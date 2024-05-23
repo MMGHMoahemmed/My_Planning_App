@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<head>
+		<title>Basic initialization</title>
+	<script src="Sources/dhtmlxgantt.js?v=8.0.6"></script>
+	<link rel="stylesheet" href="Sources/dhtmlxgantt.css?v=8.0.6">
+	
+	<!-- dhtmlxGantt-Firebase adapter -->
+<script type="text/javascript" src="Sources/dhtmlx_gantt_firebase.js"></script>
+
+<!-- FireBase JS Library -->
+<script src="https://cdn.firebase.com/js/client/2.2.4/firebase.js"></script>
+	
+  
+  
+  <style>
+		html, body {
+			height: 100%;
+			padding: 0px;
+			margin: 0px;
+			overflow: hidden;
+		}
+	</style>
+
+
+</head>
+<body>
+
+    
+
+
+    <div id="gantt_here" style="width: 100%; height: 500px;"></div>
+
+    
+	<script>
+
+
+
+
+
+
+
+    //Declare the colmuns types
+    const checkboxEditor = { type: "checkbox_editor", map_to: "checkbox" };
+    const start_dateEditor = { type: "date", map_to: "start_date" };
+    const durationEditor = { type: "number", map_to: "duration", min: 0, max: 100 };
+    const textEditor = { type: "text", map_to: "text" };
+    const end_dateEditor = { type: "date", map_to: "end_date" };
+    const progressEditor = { type: "number", map_to: "progress", min: 0, max: 100 };
+    const priorityEditor = { type: "text", map_to: "priority" };
+    const statusEditor = { type: "text", map_to: "status" };
+    const ownerEditor = { type: "text", map_to: "workers" };
+    const WBSEditor = { type: "WBS_Code", map_to: "text" };
+
+
+    //Declare the colmuns in the gantt
+    gantt.config.columns = [
+        { name: "wbs", label: "WBS", width: 40, resize: true, template: gantt.getWBSCode },
+        { name: "text", tree: true, width: 200, resize: true, editor: textEditor },
+        { name: "priority", label: "Priority", width: 50, editor: priorityEditor, resize: true, hide: false },
+        { name: "progress", label: "Progress", align: "center", width: 100, resize: true, editor: progressEditor, hide: false, template: function (task) {
+            return Math.round(task.progress * 100) + "%"
+        }
+    },
+        { name: "status", label: "status", width: 50, editor: statusEditor, resize: true, hide: false , template:function(task){
+
+if(task.status === undefined){
+  task.status = " ";
+}
+return task.status
+}, },
+        { name: "start_date", label: "Start",align: "center", width: 100, resize: true, editor: start_dateEditor },
+        { name: "duration", align: "center", width: 40, resize: true },
+        { name: "end_date", label: "End", align: "center", width: 100, resize: true, editor: end_dateEditor },
+        { name: "WBS_Code", label: "WBS Code", align: "center", width: 100, resize: true, editor: WBSEditor },
+        { name: "workers", label: "workers", align: "center", width: 100, resize: true, editor: ownerEditor, hide: false, template:function(task){
+
+if(task.workers === undefined){
+  task.workers = " ";
+}
+return task.workers
+},},
+        { name: "add", width: 30 }
+    ];
+
+
+
+    gantt.config.open_tree_initially = true;
+
+		gantt.init("gantt_here");
+
+    //Declare the data object of the firebase.
+    var data = new Firebase("https://smart-planner-60c70-default-rtdb.firebaseio.com");
+    //Load data from first collections.(Parse)
+    gantt.firebase({tasks: data.child("tasks"), links: data.child("links")});
+
+    
+//Getting the WBS Code
+    gantt.attachEvent("onBeforeTaskDisplay", function(id, task){
+ 
+  task.WBS_Code = gantt.getWBSCode(task);
+  return true;
+}); 
+
+
+
+
+
+		</script>
+
+
+
+        </body>
